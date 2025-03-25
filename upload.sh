@@ -1,21 +1,26 @@
 #!/bin/bash
 
-# Get current week number
-WEEK_NUM=$(date +%V)  # This gives the week number (e.g., 13 for week13)
+# Navigate to the main Competitive Programming folder
+cd "$(dirname "$0")" || exit
 
-# Define the folder name (like week13)
-WEEK_FOLDER="week_$WEEK_NUM"
+# Find all new subfolders that have uncommitted changes
+CHANGES=$(git status --porcelain | grep '??' | awk '{print $2}' | grep '/')
 
-# Create the folder if it doesn't exist
-mkdir -p "$WEEK_FOLDER"
+if [ -z "$CHANGES" ]; then
+    echo "⚠️ No new subfolders found. Skipping upload."
+    exit 0
+fi
 
-# Add all new changes in the repository
+echo "📂 New subfolders detected: "
+echo "$CHANGES"
+
+# Add all new subfolders to Git
 git add .
 
 # Commit with an automatic message
-git commit -m "Weekly CP upload - $WEEK_FOLDER"
+git commit -m "Weekly CP upload - New subfolders added"
 
 # Push to GitHub
 git push origin main
 
-echo "✅ Weekly upload complete for $WEEK_FOLDER"
+echo "✅ All new subfolders uploaded successfully!"
