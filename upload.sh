@@ -3,24 +3,25 @@
 # Navigate to the main Competitive Programming folder
 cd "$(dirname "$0")" || exit
 
-# Find all new subfolders that have uncommitted changes
-CHANGES=$(git status --porcelain | grep '??' | awk '{print $2}' | grep '/')
+# Pull latest changes from GitHub before pushing
+git pull --rebase origin main
 
-if [ -z "$CHANGES" ]; then
-    echo "⚠️ No new subfolders found. Skipping upload."
-    exit 0
-fi
+# Automatically add a .gitkeep file in empty folders
+for folder in */; do
+    if [ -d "$folder" ] && [ -z "$(ls -A "$folder")" ]; then
+        echo "📂 Empty folder detected: $folder"
+        touch "$folder/.gitkeep"
+    fi
+done
 
-echo "📂 New subfolders detected: "
-echo "$CHANGES"
-
-# Add all new subfolders to Git
+# Add all new and modified files to Git
 git add .
 
-# Commit with an automatic message
-git commit -m "Weekly CP upload - New subfolders added"
-
-# Push to GitHub
-git push origin main
-
-echo "✅ All new subfolders uploaded successfully!"
+# Commit and push if there are new changes
+if git diff --cached --quiet; then
+    echo "⚠️ No new files or changes detected. Skipping commit."
+else
+    git commit -m "Weekly CP upload - New files added"
+    git push origin main
+    echo "✅ All new files uploaded successfully!"
+fi
